@@ -3,7 +3,7 @@ Helper classes and functions to tidy up the code a little.
 """
 import json
 
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, namedtuple
 from threading import Thread
 
 class FileReader:
@@ -61,10 +61,12 @@ class Message:
         threads = [Thread(target=r.read) for r in file_readers]
         for thread in threads: thread.start()
         for thread in threads: thread.join()
-        messages = []
+
+        name_msg_dict = defaultdict(list)
         for reader in file_readers:
-            messages.extend(reader.messages)
-        return messages
+            for msg in reader.messages:
+                name_msg_dict[msg.sender].append(msg)
+        return name_msg_dict
 
 
 class FBMessage(Message):
@@ -74,18 +76,10 @@ class FBMessage(Message):
     def __init__(self, msg_dict):
         sender = msg_dict.get("sender_name", "")
         text = msg_dict.get("content", "")
-        time_sent = float(msg_dict.get("timestamp_ns", 0))
+        time_sent = msg_dict.get("timestamp_ns", None)
         super().__init__(sender=sender, text=text, time_sent=time_sent)
 
-def create_file_readers(file_paths: list) -> list:
-    """
-    Take a list of file paths and return a list of FileReader objects from
-    those paths.
-    :file_paths: - list of strings where each string is a path to a file
-    :return: - list of FileReader objects
-    """
-    return [FBFileReader(f_path) for f_path in file_paths]
-
+STATS = namedtuple("stats", ("messages_sent", "word_count", "char_count"))
 
 class Person:
     """
@@ -100,16 +94,13 @@ class Person:
         self._char_count = None
 
     @classmethod
-    def from_strings(cls, file_paths):
+    def from_strings(cls, file_paths, initialized=False):
         """
         Return a dict of Person objects initialized from files in file_paths.
         """
         file_readers = FBFileReader.from_strings(file_paths)
         messages = Message.from_readers(file_readers)
-        name_msg_dict = defaultdict(list)
-        for msg in messages:
-            name_msg_dict[msg.sender].append(msg)
-        return [cls(name, msgs) for (name, msgs) in name_msg_dict.items()]
+        return [Person(name, msgs) for (name, msgs) in messages.items()]
 
     @property
     def words(self):
@@ -139,3 +130,7 @@ class Person:
         if self._char_count is None:
             self._char_count = sum(len(msg.text) for msg in self.messages)
         return self._char_count
+    
+    @property
+    def basic_info(self):
+        return STATS(len(self.messages), self.word_count, self.char_count)

@@ -24,8 +24,8 @@ if __name__ == "__main__":
     ARGS = parse_args(sys.argv[1:])
     USERS = Person.from_strings(ARGS.files)
     for u in USERS:
-        name, mc, wc, cc = u.name, len(u.messages), u.word_count, u.char_count
-        print(f'{name}: {mc} messages, {wc} words, {cc} characters')
+        name, (mc, wc, cc) = u.name, u.basic_info
+        print(f'{name:<20}: {mc:<4} messages, {wc:<5} words, {cc:<5} characters')
 
     # Analyze Messages
     # Create Charts
