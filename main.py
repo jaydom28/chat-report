@@ -5,7 +5,7 @@ import sys
 
 from argparse import ArgumentParser
 
-from helpers import Person
+from helpers import Leaderboard
 
 def parse_args(args):
     """
@@ -19,13 +19,17 @@ def parse_args(args):
     parser.add_argument("-v", "--verbose", dest="verbose", action="store_true")
     return parser.parse_args(args)
 
+def display_basic_stats(users):
+    for _, u in users.items():
+        name, (mc, wc, cc) = u.name, u.basic_info
+        print(f'{name:<20}: {mc:<4} messages, {wc:<5} words, {cc:<5} characters')
 
 if __name__ == "__main__":
     ARGS = parse_args(sys.argv[1:])
-    USERS = Person.from_strings(ARGS.files)
-    for u in USERS:
-        name, (mc, wc, cc) = u.name, u.basic_info
-        print(f'{name:<20}: {mc:<4} messages, {wc:<5} words, {cc:<5} characters')
+    keywords = ["hello", "world", "blah"]
+    LEADERBOARD = Leaderboard.from_strings(ARGS.files)
+    # display_basic_stats(leaderboard.persons)
+    print(LEADERBOARD.count(keywords))
 
     # Analyze Messages
     # Create Charts

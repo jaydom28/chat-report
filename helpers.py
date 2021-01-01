@@ -2,6 +2,7 @@
 Helper classes and functions to tidy up the code a little.
 """
 import json
+import re
 
 from collections import defaultdict, Counter, namedtuple
 from threading import Thread
@@ -12,7 +13,7 @@ class FileReader:
     """
     def __init__(self, path):
         self.path = path
-        self.content =""
+        self.content = ""
         self.messages = []
 
     def read(self):
@@ -53,14 +54,29 @@ class Message:
         self.text = text
         self.time_sent = time_sent
 
+    def count(self, keywords):
+        """
+        Returns a dict representing how many times each keyword appeared in
+        the message
+        """
+        counter = Counter()
+        text = self.text.lower()
+        for keyword in sorted(keywords, key=len, reverse=True):
+            text, count = re.subn(pattern=keyword, repl='', string=text)
+            counter[keyword] = count
+        return counter
+
     @classmethod
     def from_readers(cls, file_readers):
         """
-        Returns a list of initialized message objects when given a list of readers.
+        Returns a list of initialized message objects when given a list of
+        FileReaders.
         """
         threads = [Thread(target=r.read) for r in file_readers]
-        for thread in threads: thread.start()
-        for thread in threads: thread.join()
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
 
         name_msg_dict = defaultdict(list)
         for reader in file_readers:
@@ -94,13 +110,13 @@ class Person:
         self._char_count = None
 
     @classmethod
-    def from_strings(cls, file_paths, initialized=False):
+    def from_strings(cls, file_paths):
         """
         Return a dict of Person objects initialized from files in file_paths.
         """
         file_readers = FBFileReader.from_strings(file_paths)
         messages = Message.from_readers(file_readers)
-        return [Person(name, msgs) for (name, msgs) in messages.items()]
+        return {name: Person(name, msgs) for (name, msgs) in messages.items()}
 
     @property
     def words(self):
@@ -110,7 +126,7 @@ class Person:
         if self._words is None:
             self._words = Counter()
             for msg in self.messages:
-                self._words += Counter(msg.text.split())
+                self._words += Counter(msg.text.lower().split())
         return self._words
 
     @property
@@ -130,7 +146,49 @@ class Person:
         if self._char_count is None:
             self._char_count = sum(len(msg.text) for msg in self.messages)
         return self._char_count
-    
+
     @property
     def basic_info(self):
+        """
+        Returns basic stats as a tuple.
+        """
         return STATS(len(self.messages), self.word_count, self.char_count)
+
+    def count(self, keywords):
+        """
+        Return a Counter object indicating how many times a person has said
+        each keyword
+        """
+        word_counts = Counter()
+        for message in self.messages:
+            word_counts += message.count(keywords)
+        return word_counts
+
+class Leaderboard:
+    """
+    Keeps track of multiple person objects
+    """
+    def __init__(self, persons=None):
+        self.persons = persons if persons is not None else {}
+
+    @classmethod
+    def from_strings(cls, file_paths):
+        """
+        Initializes a leaderboard object using a list of file paths
+        """
+        return cls(persons=Person.from_strings(file_paths))
+
+    def add_person(self, person):
+        """
+        Adds a person object to the dict
+        """
+        self.persons[person.name] = person
+
+    def count(self, keywords):
+        """
+        Returns a grand total of each keyword across all persons
+        """
+        acc = Counter()
+        for _, person in self.persons.items():
+            acc += person.count(keywords)
+        return acc
