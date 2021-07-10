@@ -22,7 +22,7 @@ class Person:
     """
     def __init__(self, name, messages=None):
         self.name = name
-        self.messages = messages if messages is not None else []
+        self.messages = messages or []
         self._words = None
         self._word_count = None
         self._char_count = None
@@ -90,7 +90,7 @@ class PersonContainer:
     Keeps track of multiple person objects
     """
     def __init__(self, persons=None):
-        self.persons = persons if persons is not None else {}
+        self.persons = persons or {}
 
     @classmethod
     def from_strings(cls, file_paths):

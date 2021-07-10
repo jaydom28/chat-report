@@ -22,10 +22,9 @@ class FileReader:
 
     def read(self):
         """
-        Return the contents of self.path
+        Store the contents of the file at self.path
         """
         try:
-            logging.debug(f'Now scanning {self.path}')
             with open(self.path, "r") as message_file:
                 self.content = message_file.read()
         except FileNotFoundError as err:

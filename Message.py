@@ -32,11 +32,8 @@ class Message:
         Returns a list of initialized message objects when given a list of
         FileReaders.
         """
-        threads = [Thread(target=r.read) for r in file_readers]
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
+        for reader in file_readers:
+            reader.read()
 
         name_msg_dict = defaultdict(list)
         for reader in file_readers:

@@ -23,9 +23,9 @@ To run the script, use:
         - [ ] Find a way to fix the punctuation codes
     - [x] Create a dict of each person's word count (if they are real words)
 - [ ] Create visual figures in the following order
-    - [ ] Pie Chart of each person's message contribution to conversation (relative to total messages typed in chat)
-    - [ ] Pie Chart of each person's word contribution to conversation (relative to total words typed in chat)
-    - [ ] Pie Chart of each person's character contribution to conversation (relative to total words typed in chat)
+    - [x] Pie Chart of each person's message contribution to conversation (relative to total messages typed in chat)
+    - [x] Pie Chart of each person's word contribution to conversation (relative to total words typed in chat)
+    - [x] Pie Chart of each person's character contribution to conversation (relative to total words typed in chat)
     - [ ] Create figures for each specific word category (MAKE SURE THAT REACTIONS IS A CATEGORY)
         - [ ] Create figures for each individual person
             - [ ] Pie chart showing distribution of each of their words in the category
