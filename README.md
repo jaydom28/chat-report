@@ -14,6 +14,7 @@ To run the script, use:
 `python main.py [FILES CONTAINING FACEBOOK MESSAGE JSON FILES]`
 
 ## To-do
+- [ ] Add logging to modules
 - [x] Read in messages
     - [x] Read in a JSON file of facebook messages
     - [ ] Figure out other ways to get message data
